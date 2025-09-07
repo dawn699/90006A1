@@ -1,0 +1,189 @@
+Specs of five methods:
+-- registerAnalyst
+-- authenticate
+-- requestSupervisorAccess
+-- submitIncident
+-- getIncident
+
+Below are the names of methods students may use when writing test cases. For details, please refer to the comments at the top of the relevant code implementation.
+-- isRegistered
+-- isAuthenticated
+-- findLowestRating
+-- hasDuplicateIncidentID
+-- getAnalystRole
+-- getIncidentRating
+-- isSavedIncident
+
+----------------------------------------------------------------------------------------------------
+
+registerAnalyst:
+
+Creates a new analyst account with an authentication status of NOT_AUTHENTICATED and a default role of MEMBER.
+Accounts can only be registered as analysts; the role is not taken as an input. The following requirements must be met:
+
+Signature:
+  public void registerAnalyst(String analystName, String password)
+      throws DuplicateAnalystException, InvalidAnalystNameException, InvalidPasswordException
+
+Parameters:
+- analystName: The name identifier for the analyst account.
+- password: The password for the analyst.
+
+Requirements:
+
+- Analyst Name:
+  - The name must not have been registered previously.
+  - It must be at least four characters long.
+  - It must contain only lower- and upper-case letters.
+
+- Password:
+  - Must be between 10 and 16 characters long (inclusive).
+  - Must contain at least one letter (a-z, A-Z).
+  - Must contain at least one digit (0-9).
+  - Must contain at least one special character (anything other than a-z, A-Z, or 0-9)
+   
+Exceptions (thrown in order):
+- DuplicateAnalystException: Thrown if the analyst name is already registered.
+- InvalidAnalystNameException: Thrown if the analyst name does not meet the specified requirements.
+- InvalidPasswordException: Thrown if the password does not meet the specified requirements.
+
+For example:
+-- DuplicateAnalystException is thrown first (i.e., existing analyst names are all valid)
+-- If analystName is invalid, then we do not check for a valid password
+-- If analystName is valid, only then we check for a valid password
+
+Assumptions:
+-- analystName and password are non-null.
+-- the role of a newly registered analyst is MEMBER.
+
+----------------------------------------------------------------------------------------------------
+
+authenticate:
+
+Authenticates an analyst using their analyst name and password, then returns their authentication status. Please note that a role is not required as an input for authentication.
+
+Signature:
+  public void authenticate(String analystName, String password)
+      throws NoSuchAnalystException, IncorrectPasswordException
+
+Parameters:
+- analystName: The name of the analyst.
+- password: The password associated with the analyst.
+
+Requirements:
+- If the analyst exists and the password is correct, it sets the stored authenticated status for analystName to AUTHENTICATED.
+- If either one of the credentials is incorrect, it sets the stored auth status for analystName (if registered) to NOT_AUTHENTICATED, and throws exceptions.
+
+
+Exceptions (thrown in order):
+- NoSuchAnalystException: Thrown if the analyst name is not registered.
+- IncorrectPasswordException: Thrown if the password does not match the analyst's name.
+
+Assumptions:
+analystName and password are non-null. All inputs are assumed to be syntactically valid.
+
+Note: This method does not validate whether the analystName or password follows the constraints defined
+in the account registration method.
+
+----------------------------------------------------------------------------------------------------
+
+requestSupervisorAccess:
+
+Allows an analyst to request a supervisor role by providing a badge ID.
+If the badge ID matches a known valid supervisor badge ID, the analyst’s role is set to SUPERVISOR.
+This function is there for the IT team; it can be called regardless of the analyst's authentication status.
+
+Signature:
+  public void requestSupervisorAccess(String analystName, String badgeID)
+      throws NoSuchAnalystException, InvalidBadgeIDException
+
+Parameters:
+- analystName: The name of the analyst requesting the supervisor role.
+- badgeID: A string representing the badge ID being submitted for verification.
+
+Requirements:
+- The analyst must be registered.
+- The badgeID must match exactly one in the fixed set {"1234","1235"}.
+- If the analyst already has the SUPERVISOR role, the call has no effect and returns normally.
+
+
+Exceptions (thrown in order):
+- NoSuchAnalystException: Thrown if the analyst name is not registered.
+- InvalidBadgeIDException: Thrown if the badgeID is not in the list of valid supervisor badge IDs.
+
+Assumptions:
+- analystName and badgeID are non-null.
+- This function can be called regardless of the analyst's authentication status.
+- The valid badgeIDs are hard-coded, all possible badgeIDs are listed as a private member in the IRMS class, there's no way to create/delete badgeIDs in the system.
+
+----------------------------------------------------------------------------------------------------
+submitIncident:
+
+Allows an authenticated analyst to register a new incident. Each incident has a unique identifier and a numeric severity rating from 0 to 9. If the analyst holds a SUPERVISOR role, they are permitted to submit any incidents.
+If the analyst has a MEMBER role, they can only submit to an empty incident list, or submit new incidents having a rating higher than the lowest rating currently in the list.
+
+Signature:
+  public void submitIncident(String analystName, String incidentID, int rating)
+      throws NoSuchAnalystException, UnauthenticatedAnalystException, DuplicateIncidentException,
+            InvalidRatingException,IncidentRejectException
+
+Parameters:
+- analystName: The name of the analyst submitting the incident.
+- incidentID: The identifier for the incident.
+- rating: The severity rating of the incident, which is a signed integer.
+
+Requirements:
+- The analyst must be registered.
+- The analyst must be authenticated.
+- The incidentID must not already be registered in the system.
+- The rating must be between 0 and 9 (inclusive).
+- If the analyst has a SUPERVISOR role, accept any incident they submit.
+- If the analyst has a MEMBER role and the incident list is empty, accept any incident they submit.
+- If the analyst has a MEMBER role and the list is not empty, accept new incidents having a rating strictly greater than the current lowest rating at the time of submission.
+
+Exceptions (thrown in order):
+- NoSuchAnalystException: Thrown if the analyst name is not registered.
+- UnauthenticatedAnalystException: Thrown if the analyst is not currently authenticated.
+- DuplicateIncidentException: Thrown if the incidentID already exists in the system.
+- InvalidRatingException: Thrown if the rating is not within the valid range [0–9].
+- IncidentRejectException: Thrown if the incident is not accepted.
+
+Assumptions:
+- AnalystName, rating are non-null. incidentID is non-null and non-empty.
+- IncidentID does not have any requirements on its format; incidentID equality is checked using exact, case-sensitive string comparison (no trimming).
+- Checking if an incidentID duplicates with existing IDs is done by the method hasDuplicateIncidentID.
+- Getting the current incident with the lowest rating is done by the method findLowestRating.
+- A new incident is appended at the end of the existing incident list.
+
+
+----------------------------------------------------------------------------------------------------
+
+getIncident:
+
+Allows an analyst to retrieve an incident by its 0-based index in the incident list.
+
+Signature:
+  public SimpleEntry<String, Integer> getIncident(String analystName, int index)
+      throws NoSuchAnalystException, IndexOutOfBoundsException
+
+Parameters:
+- analystName: The name of the analyst getting Incident records.
+- index: 0-based position of the incidents to be read.
+
+Requirements:
+- The analyst must be registered.
+
+Returns:
+- A SimpleEntry<String,Integer> representing <incidentID, rating>.
+
+Exceptions (thrown in order):
+- NoSuchAnalystException: Thrown if analystName is not registered.
+- java.lang.IndexOutOfBoundsException: if the index is not in [0, len(incidents)-1]
+
+Assumptions:
+- AnalystName and index are not null.
+- This function can be called regardless of the analyst's authentication status.
+- Incidents are stored in insertion order; indexing reflects this order.
+
+Note:
+- index is a positional index and is unrelated to incidentID.
