@@ -60,14 +60,14 @@ public class PartitioningTests {
      * This is an example of a test that is designed to fail.
      * It shows how to include an error message to provide feedback when a test doesn't pass.
      */
-    @Test
-    public void aFailedTest() {
-        // This test currently fails to demonstrate how JUnit reports errors
-        final int expected = 2;
-        final int actual = 1 + 2;
-        // Uncomment the following line to observe a test failure.
-        assertEquals("Some failure message", expected, actual);
-    }
+    // @Test
+    // public void aFailedTest() {
+    //     // This test currently fails to demonstrate how JUnit reports errors
+    //     final int expected = 2;
+    //     final int actual = 1 + 2;
+    //     // Uncomment the following line to observe a test failure.
+    //     assertEquals("Some failure message", expected, actual);
+    // }
 
     // ADD YOUR TESTS HERE
     // This is the section where you will add your own tests.
@@ -380,4 +380,5 @@ public class PartitioningTests {
     }
 
 }
+
 
